@@ -80,6 +80,10 @@ void Error_Handler(void);
 #define I2C_ADD_3_GPIO_Port GPIOB
 #define HEART_BEAT_Pin GPIO_PIN_8
 #define HEART_BEAT_GPIO_Port GPIOA
+#define SCL_Pin GPIO_PIN_6
+#define SCL_GPIO_Port GPIOB
+#define SDA_Pin GPIO_PIN_7
+#define SDA_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
