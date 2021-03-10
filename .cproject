@@ -39,13 +39,13 @@
 								<option id="gnu.c.compiler.option.debugging.level.568040115" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.max" valueType="enumerated" />
 								<option id="gnu.c.compiler.option.include.paths.1064219071" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
                   <listOptionValue builtIn="false" value="../Core/Inc" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/STM32F1xx_HAL_Driver/Inc" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Middlewares/Third_Party/FreeRTOS/Source/include" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/CMSIS/Device/ST/STM32F1xx/Include" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/CMSIS/Include" />
+                  <listOptionValue builtIn="false" value="../Drivers/STM32F1xx_HAL_Driver/Inc" />
+                  <listOptionValue builtIn="false" value="../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy" />
+                  <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/include" />
+                  <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2" />
+                  <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3" />
+                  <listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32F1xx/Include" />
+                  <listOptionValue builtIn="false" value="../Drivers/CMSIS/Include" />
                 </option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1942796328" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
                   <listOptionValue builtIn="false" value="USE_HAL_DRIVER" />
@@ -60,13 +60,13 @@
 								<option id="gnu.cpp.compiler.option.debugging.level.1991951622" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated" />
 								<option id="gnu.cpp.compiler.option.include.paths.1021857326" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
                   <listOptionValue builtIn="false" value="../Core/Inc" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/STM32F1xx_HAL_Driver/Inc" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Middlewares/Third_Party/FreeRTOS/Source/include" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/CMSIS/Device/ST/STM32F1xx/Include" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/CMSIS/Include" />
+                  <listOptionValue builtIn="false" value="../Drivers/STM32F1xx_HAL_Driver/Inc" />
+                  <listOptionValue builtIn="false" value="../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy" />
+                  <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/include" />
+                  <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2" />
+                  <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3" />
+                  <listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32F1xx/Include" />
+                  <listOptionValue builtIn="false" value="../Drivers/CMSIS/Include" />
                 </option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.217739077" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
                   <listOptionValue builtIn="false" value="USE_HAL_DRIVER" />
@@ -158,13 +158,13 @@
 								<option id="gnu.c.compiler.option.debugging.level.568040115" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.max" valueType="enumerated" />
 								<option id="gnu.c.compiler.option.include.paths.1064219071" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
                   <listOptionValue builtIn="false" value="../Core/Inc" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/STM32F1xx_HAL_Driver/Inc" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Middlewares/Third_Party/FreeRTOS/Source/include" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/CMSIS/Device/ST/STM32F1xx/Include" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/CMSIS/Include" />
+                  <listOptionValue builtIn="false" value="../Drivers/STM32F1xx_HAL_Driver/Inc" />
+                  <listOptionValue builtIn="false" value="../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy" />
+                  <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/include" />
+                  <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2" />
+                  <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3" />
+                  <listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32F1xx/Include" />
+                  <listOptionValue builtIn="false" value="../Drivers/CMSIS/Include" />
                 </option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1942796328" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
                   <listOptionValue builtIn="false" value="USE_HAL_DRIVER" />
@@ -179,13 +179,13 @@
 								<option id="gnu.cpp.compiler.option.debugging.level.1991951622" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.debugging.level.max" valueType="enumerated" />
 								<option id="gnu.cpp.compiler.option.include.paths.1021857326" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
                   <listOptionValue builtIn="false" value="../Core/Inc" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/STM32F1xx_HAL_Driver/Inc" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Middlewares/Third_Party/FreeRTOS/Source/include" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/CMSIS/Device/ST/STM32F1xx/Include" />
-                  <listOptionValue builtIn="false" value="/home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/CMSIS/Include" />
+                  <listOptionValue builtIn="false" value="../Drivers/STM32F1xx_HAL_Driver/Inc" />
+                  <listOptionValue builtIn="false" value="../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy" />
+                  <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/include" />
+                  <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2" />
+                  <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3" />
+                  <listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32F1xx/Include" />
+                  <listOptionValue builtIn="false" value="../Drivers/CMSIS/Include" />
                 </option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.symbols.2060825648" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
                   <listOptionValue builtIn="false" value="USE_HAL_DRIVER" />
