@@ -147,7 +147,8 @@ void StartHeartBeatTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    HAL_GPIO_TogglePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin);
+    osDelay(1000);
   }
   /* USER CODE END StartHeartBeatTask */
 }
