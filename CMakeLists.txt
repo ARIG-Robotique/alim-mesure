@@ -46,7 +46,7 @@ else ()
     add_compile_options(-Og -g)
 endif ()
 
-include_directories(Core/Inc /home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/STM32F1xx_HAL_Driver/Inc /home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy /home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Middlewares/Third_Party/FreeRTOS/Source/include /home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 /home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3 /home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/CMSIS/Device/ST/STM32F1xx/Include /home/gregorydepuille@sglk.local/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/CMSIS/Include)
+include_directories(Core/Inc Drivers/STM32F1xx_HAL_Driver/Inc Drivers/STM32F1xx_HAL_Driver/Inc/Legacy Middlewares/Third_Party/FreeRTOS/Source/include Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3 Drivers/CMSIS/Device/ST/STM32F1xx/Include Drivers/CMSIS/Include)
 
 add_definitions(-DUSE_HAL_DRIVER -DSTM32F103xB)
 
