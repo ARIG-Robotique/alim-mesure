@@ -28,6 +28,7 @@
 /* USER CODE BEGIN Includes */
 #include "i2c.h"
 #include <stdio.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -42,7 +43,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -60,7 +61,7 @@ const osThreadAttr_t heartBeatTask_attributes = {
 osThreadId_t i2cTaskHandle;
 const osThreadAttr_t i2cTask_attributes = {
   .name = "i2cTask",
-  .stack_size = 128 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
 
@@ -147,11 +148,11 @@ void StartHeartBeatTask(void *argument)
 void StartI2CTask(void *argument)
 {
   /* USER CODE BEGIN StartI2CTask */
-  printf("i2cTask: Scanning I2C bus:\n");
-  HAL_StatusTypeDef result;
-  uint8_t i;
-  for (i=1; i<128; i++)
-  {
+//  printf("i2cTask: Scanning I2C bus:\n");
+//  HAL_StatusTypeDef result;
+//  uint8_t i;
+//  for (i=1; i<128; i++)
+//  {
     /*
      * the HAL wants a left aligned i2c address
      * &hi2c1 is the handle
@@ -159,39 +160,56 @@ void StartI2CTask(void *argument)
      * retries 2
      * timeout 2
      */
-    result = HAL_I2C_IsDeviceReady(&hi2c1, (uint16_t)(i<<1), 2, 2);
+//    result = HAL_I2C_IsDeviceReady(&hi2c1, (uint16_t)(i<<1), 2, 2);
 //    if (result != HAL_OK) // HAL_ERROR or HAL_BUSY or HAL_TIMEOUT
 //    {
 //      printf("."); // No ACK received at that address
 //    }
-    if (result == HAL_OK)
-    {
-      printf("i2cTask: 0x%X", i); // Received an ACK at that address
-    }
-  }
-  printf("\n");
+//    if (result == HAL_OK)
+//    {
+//      printf("i2cTask: 0x%X", i); // Received an ACK at that address
+//    }
+//  }
+//  printf("\n");
 
   /* Infinite loop */
+  uint8_t rxBuffer[3];
+
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "EndlessLoop"
   while(1)
   {
-    uint8_t send[2] = {0x4C, 0xA0};
-    HAL_StatusTypeDef result = HAL_I2C_Master_Transmit(&hi2c1, 0x22 << 1, send, sizeof(send), 1);
-    if (result == HAL_OK) {
-      printf("i2cTask: Master transmit\n");
-      uint8_t data[2];
-      result = HAL_I2C_Master_Receive(&hi2c1, 0x22 << 1, data, sizeof(data), 1);
-      if (result == HAL_OK) {
-        printf("i2cTask: Master receive 0x%02X 0x%02X\n", data[0], data[1]);
-      } else {
-        printf("i2cTask: Master receive failed\n");
-      }
+//    uint8_t send[2] = {0x4C, 0xA0};
+//    HAL_StatusTypeDef result = HAL_I2C_Master_Transmit(&hi2c1, 0x22 << 1, send, sizeof(send), 1);
+//    if (result == HAL_OK) {
+//      printf("i2cTask: Master transmit\n");
+//      uint8_t data[2];
+//      result = HAL_I2C_Master_Receive(&hi2c1, 0x22 << 1, data, sizeof(data), 1);
+//      if (result == HAL_OK) {
+//        printf("i2cTask: Master receive 0x%02X 0x%02X\n", data[0], data[1]);
+//      } else {
+//        printf("i2cTask: Master receive failed\n");
+//      }
+//    } else {
+//      printf("i2cTask: Master transmit failed\n");
+//      printf("Error code %d\n", hi2c1.ErrorCode);
+//    }
+//
+//    osDelay(5000);
+
+    printf("i2cTask: Slave receive\n");
+    if (HAL_I2C_Slave_Receive_IT(&hi2c1, (uint8_t *) rxBuffer, 2) != HAL_OK) {
+      printf("i2cTask: Slave receive error\n");
     } else {
-      printf("i2cTask: Master transmit failed\n");
-      printf("Error code %d\n", hi2c1.ErrorCode);
+      printf("i2cTask: Receive %s\n", rxBuffer);
+      if (strcmp(rxBuffer, "L1") == 0 || strcmp(rxBuffer, "L0") == 0 ) {
+        HAL_I2C_Slave_Transmit_IT(&hi2c1, (uint8_t *) "OK", 2);
+      }
     }
 
     osDelay(5000);
   }
+#pragma clang diagnostic pop
   /* USER CODE END StartI2CTask */
 }
 
