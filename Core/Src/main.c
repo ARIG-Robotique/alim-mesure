@@ -26,7 +26,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -40,6 +40,8 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+
+extern void initialise_monitor_handles(void);
 
 /* USER CODE END PM */
 
@@ -68,7 +70,8 @@ void MX_FREERTOS_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  initialise_monitor_handles();
+  printf("main:Begin MCU Configuration\n");
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -77,14 +80,14 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  printf("main:Begin Init\n");
   /* USER CODE END Init */
 
   /* Configure the system clock */
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+  printf("main:Begin SysInit\n");
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -92,7 +95,7 @@ int main(void)
   MX_ADC1_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-
+  printf("main:Begin FreeRTOS\n");
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -194,6 +197,7 @@ void Error_Handler(void)
   __disable_irq();
   while (1)
   {
+    printf("ERROR HANDLER");
   }
   /* USER CODE END Error_Handler_Debug */
 }
