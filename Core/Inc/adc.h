@@ -40,7 +40,10 @@ extern ADC_HandleTypeDef hadc1;
 void MX_ADC1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+void adcSelectAlim1Volt(void);
+void adcSelectAlim1Current(void);
+void adcSelectAlim2Volt(void);
+void adcSelectAlim2Current(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

@@ -49,7 +49,7 @@
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN PFP */
-
+void errorBlink(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -77,8 +77,12 @@ void NMI_Handler(void)
   LOG_ERROR("stm32f1xx_it: NonMaskableInt_IRQn");
   /* USER CODE END NonMaskableInt_IRQn 0 */
   /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "EndlessLoop"
   while (true) {
+    errorBlink();
   }
+#pragma clang diagnostic pop
   /* USER CODE END NonMaskableInt_IRQn 1 */
 }
 
@@ -93,6 +97,7 @@ void HardFault_Handler(void)
   while (1)
   {
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+    errorBlink();
     /* USER CODE END W1_HardFault_IRQn 0 */
   }
 }
@@ -108,6 +113,7 @@ void MemManage_Handler(void)
   while (1)
   {
     /* USER CODE BEGIN W1_MemoryManagement_IRQn 0 */
+    errorBlink();
     /* USER CODE END W1_MemoryManagement_IRQn 0 */
   }
 }
@@ -123,6 +129,7 @@ void BusFault_Handler(void)
   while (1)
   {
     /* USER CODE BEGIN W1_BusFault_IRQn 0 */
+    errorBlink();
     /* USER CODE END W1_BusFault_IRQn 0 */
   }
 }
@@ -138,6 +145,7 @@ void UsageFault_Handler(void)
   while (1)
   {
     /* USER CODE BEGIN W1_UsageFault_IRQn 0 */
+    errorBlink();
     /* USER CODE END W1_UsageFault_IRQn 0 */
   }
 }
@@ -205,6 +213,11 @@ void I2C1_ER_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-
+void errorBlink(void) {
+  for (int i = 0 ; i < 10 ; i++) {
+    HAL_GPIO_TogglePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin);
+    HAL_Delay(100);
+  }
+}
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

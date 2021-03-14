@@ -27,9 +27,11 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "i2c.h"
+#include "adc.h"
 #include "itm_log.h"
 #include <stdbool.h>
 #include <string.h>
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,8 +53,8 @@
 /* USER CODE BEGIN Variables */
 
 typedef struct {
-    float tension;
-    float current;
+    uint32_t tension;
+    uint32_t current;
     bool fault;
 } Alimentation;
 
@@ -78,7 +80,7 @@ const osThreadAttr_t i2cTask_attributes = {
 osThreadId_t ioTaskHandle;
 const osThreadAttr_t ioTask_attributes = {
   .name = "ioTask",
-  .stack_size = 128 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
 
@@ -100,7 +102,7 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
   */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
-
+  LOG_INFO("freertos: Init FreeRTOS");
   /* USER CODE END Init */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -214,14 +216,35 @@ void StartI2CTask(void *argument)
       }
 
     } else if (cmdBuffer[0] == I2C_CMD_GET_DATA) {
-      // 0 : Alim 1 current
-      // 1 : Alim 1 tension
-      // 2 : Alim 1 fault
-      // 3 : Alim 2 current
-      // 4 : Alim 2 tension
-      // 5 : Alim 2 fault
-      uint8_t txBuffer[6] = {3, 2 , alim1.fault, 1, 5, alim2.fault};
-      if (HAL_I2C_Slave_Transmit_IT(&hi2c1, txBuffer, 6) != HAL_OK) {
+      uint8_t txBuffer[18];
+
+      // 0-3   : Alim 1 tension
+      txBuffer[0] = (alim1.tension >> 24) & 0xFF;
+      txBuffer[1] = (alim1.tension >> 16) & 0xFF;
+      txBuffer[2] = (alim1.tension >> 8) & 0xFF;
+      txBuffer[3] = alim1.tension & 0xFF;
+      // 4-7   : Alim 1 current
+      txBuffer[4] = (alim1.current >> 24) & 0xFF;
+      txBuffer[5] = (alim1.current >> 16) & 0xFF;
+      txBuffer[6] = (alim1.current >> 8) & 0xFF;
+      txBuffer[7] = alim1.current & 0xFF;
+      // 8     : Alim 1 fault
+      txBuffer[8] = alim1.fault;
+
+      // 9-12  : Alim 2 tension
+      txBuffer[9] = (alim2.tension >> 24) & 0xFF;
+      txBuffer[10] = (alim2.tension >> 16) & 0xFF;
+      txBuffer[11] = (alim2.tension >> 8) & 0xFF;
+      txBuffer[12] = alim2.tension & 0xFF;
+      // 13-16 : Alim 2 current
+      txBuffer[13] = (alim2.current >> 24) & 0xFF;
+      txBuffer[14] = (alim2.current >> 16) & 0xFF;
+      txBuffer[15] = (alim2.current >> 8) & 0xFF;
+      txBuffer[16] = alim2.current & 0xFF;
+      // 17    : Alim 2 fault
+      txBuffer[17] = alim2.fault;
+
+      if (HAL_I2C_Slave_Transmit_IT(&hi2c1, txBuffer, 18) != HAL_OK) {
         LOG_ERROR("i2cTask: Erreur de transmission des données de mesure");
         continue;
       }
@@ -254,13 +277,54 @@ void StartIOTask(void *argument)
   /* USER CODE BEGIN StartIOTask */
   LOG_INFO("ioTask: Start");
   /* Infinite loop */
+
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "EndlessLoop"
   while (true) {
-    //LOG_INFO("ioTask: Read fault states");
+    LOG_INFO("ioTask: Read fault states");
     alim1.fault = HAL_GPIO_ReadPin(FAULT_1_GPIO_Port, FAULT_1_Pin) == GPIO_PIN_RESET;
     alim2.fault = HAL_GPIO_ReadPin(FAULT_2_GPIO_Port, FAULT_2_Pin) == GPIO_PIN_RESET;
-    osDelay(2000);
+
+    LOG_INFO("ioTask: Read ADC Alim 1 Volt");
+    adcSelectAlim1Volt();
+    HAL_ADC_Start(&hadc1);
+    HAL_ADC_PollForConversion(&hadc1, 1000);
+    alim1.tension = HAL_ADC_GetValue(&hadc1);
+    HAL_ADC_Stop(&hadc1);
+
+    LOG_INFO("ioTask: Read ADC Alim 1 Current");
+    adcSelectAlim1Current();
+    HAL_ADC_Start(&hadc1);
+    HAL_ADC_PollForConversion(&hadc1, 1000);
+    alim1.current = HAL_ADC_GetValue(&hadc1);
+    HAL_ADC_Stop(&hadc1);
+
+    LOG_INFO("ioTask: Read ADC Alim 2 Volt");
+    adcSelectAlim2Volt();
+    HAL_ADC_Start(&hadc1);
+    HAL_ADC_PollForConversion(&hadc1, 1000);
+    alim2.tension = HAL_ADC_GetValue(&hadc1);
+    HAL_ADC_Stop(&hadc1);
+
+    LOG_INFO("ioTask: Read ADC Alim 2 Current");
+    adcSelectAlim2Current();
+    HAL_ADC_Start(&hadc1);
+    HAL_ADC_PollForConversion(&hadc1, 1000);
+    alim2.current = HAL_ADC_GetValue(&hadc1);
+    HAL_ADC_Stop(&hadc1);
+
+    char str [100];
+    LOG_INFO("ADC Values");
+    sprintf(str, "Alim 1 (V) : %lu", alim1.tension);
+    LOG_INFO(str);
+    sprintf(str, "Alim 1 (A) : %lu", alim1.current);
+    LOG_INFO(str);
+    sprintf(str, "Alim 2 (V) : %lu", alim2.tension);
+    LOG_INFO(str);
+    sprintf(str, "Alim 2 (A) : %lu", alim2.current);
+    LOG_INFO(str);
+
+    osDelay(5000);
   }
 #pragma clang diagnostic pop
   /* USER CODE END StartIOTask */
