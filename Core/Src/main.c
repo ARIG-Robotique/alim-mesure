@@ -26,7 +26,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <stdio.h>
+#include "itm_log.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -40,8 +40,6 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
-extern void initialise_monitor_handles(void);
 
 /* USER CODE END PM */
 
@@ -70,8 +68,7 @@ void MX_FREERTOS_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  initialise_monitor_handles();
-  printf("main:Begin MCU Configuration\n");
+  LOG_INFO("main: Begin MCU Configuration");
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -80,14 +77,14 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  printf("main:Begin Init\n");
+  LOG_INFO("main: Begin Init");
   /* USER CODE END Init */
 
   /* Configure the system clock */
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-  printf("main:Begin SysInit\n");
+  LOG_INFO("main: Begin SysInit");
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -95,7 +92,7 @@ int main(void)
   MX_ADC1_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-  printf("main:Begin FreeRTOS\n");
+  LOG_INFO("main: Begin FreeRTOS");
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -107,12 +104,15 @@ int main(void)
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "EndlessLoop"
+  while (1) {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    LOG_WARN("main: Execution après init de FreeRTOS. Tres bizarre");
   }
+#pragma clang diagnostic pop
   /* USER CODE END 3 */
 }
 
@@ -195,10 +195,18 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
-  while (1)
-  {
-    printf("ERROR HANDLER");
+  LOG_ERROR("main: ERROR HANDLER");
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "EndlessLoop"
+  while (1) {
+    HAL_GPIO_WritePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin, GPIO_PIN_RESET);
+    osDelay(1000);
+    for (int i = 0 ; i < 10 ; i++) {
+      HAL_GPIO_TogglePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin);
+      osDelay(100);
+    }
   }
+#pragma clang diagnostic pop
   /* USER CODE END Error_Handler_Debug */
 }
 

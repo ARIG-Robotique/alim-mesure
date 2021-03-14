@@ -27,7 +27,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "i2c.h"
-#include <stdio.h>
+#include "itm_log.h"
+#include <stdbool.h>
 #include <string.h>
 /* USER CODE END Includes */
 
@@ -43,11 +44,20 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
+
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+
+typedef struct {
+    float tension;
+    float current;
+    bool fault;
+} Alimentation;
+
+Alimentation alim1;
+Alimentation alim2;
 
 /* USER CODE END Variables */
 /* Definitions for heartBeatTask */
@@ -64,6 +74,13 @@ const osThreadAttr_t i2cTask_attributes = {
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for ioTask */
+osThreadId_t ioTaskHandle;
+const osThreadAttr_t ioTask_attributes = {
+  .name = "ioTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -72,6 +89,7 @@ const osThreadAttr_t i2cTask_attributes = {
 
 void StartHeartBeatTask(void *argument);
 void StartI2CTask(void *argument);
+void StartIOTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -108,6 +126,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of i2cTask */
   i2cTaskHandle = osThreadNew(StartI2CTask, NULL, &i2cTask_attributes);
 
+  /* creation of ioTask */
+  ioTaskHandle = osThreadNew(StartIOTask, NULL, &ioTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -128,13 +149,28 @@ void MX_FREERTOS_Init(void) {
 void StartHeartBeatTask(void *argument)
 {
   /* USER CODE BEGIN StartHeartBeatTask */
+  LOG_INFO("heartBeatTask: Start");
   /* Infinite loop */
-  for(;;)
-  {
-    printf("heartBeatTask: Toggle LED\n");
-    HAL_GPIO_TogglePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin);
-    osDelay(1000);
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "EndlessLoop"
+  while (true) {
+    if (!alim1.fault && !alim2.fault) {
+      //LOG_INFO("heartBeatTask: Toggle LED");
+      HAL_GPIO_TogglePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin);
+      osDelay(1000);
+    } else {
+      LOG_INFO("heartBeatTask: Fault blink");
+      HAL_GPIO_WritePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin, GPIO_PIN_RESET);
+      osDelay(100);
+      for (int i = 0; i < 6; i++) {
+        HAL_GPIO_TogglePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin);
+        osDelay(100);
+      }
+      HAL_GPIO_WritePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin, GPIO_PIN_RESET);
+      osDelay(5000);
+    }
   }
+#pragma clang diagnostic pop
   /* USER CODE END StartHeartBeatTask */
 }
 
@@ -148,69 +184,86 @@ void StartHeartBeatTask(void *argument)
 void StartI2CTask(void *argument)
 {
   /* USER CODE BEGIN StartI2CTask */
-//  printf("i2cTask: Scanning I2C bus:\n");
-//  HAL_StatusTypeDef result;
-//  uint8_t i;
-//  for (i=1; i<128; i++)
-//  {
-    /*
-     * the HAL wants a left aligned i2c address
-     * &hi2c1 is the handle
-     * (uint16_t)(i<<1) is the i2c address left aligned
-     * retries 2
-     * timeout 2
-     */
-//    result = HAL_I2C_IsDeviceReady(&hi2c1, (uint16_t)(i<<1), 2, 2);
-//    if (result != HAL_OK) // HAL_ERROR or HAL_BUSY or HAL_TIMEOUT
-//    {
-//      printf("."); // No ACK received at that address
-//    }
-//    if (result == HAL_OK)
-//    {
-//      printf("i2cTask: 0x%X", i); // Received an ACK at that address
-//    }
-//  }
-//  printf("\n");
+  LOG_INFO("i2cTask: Start");
 
   /* Infinite loop */
-  uint8_t rxBuffer[3];
-
+  uint8_t cmdBuffer[2];
+  bool transmit;
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "EndlessLoop"
-  while(1)
-  {
-//    uint8_t send[2] = {0x4C, 0xA0};
-//    HAL_StatusTypeDef result = HAL_I2C_Master_Transmit(&hi2c1, 0x22 << 1, send, sizeof(send), 1);
-//    if (result == HAL_OK) {
-//      printf("i2cTask: Master transmit\n");
-//      uint8_t data[2];
-//      result = HAL_I2C_Master_Receive(&hi2c1, 0x22 << 1, data, sizeof(data), 1);
-//      if (result == HAL_OK) {
-//        printf("i2cTask: Master receive 0x%02X 0x%02X\n", data[0], data[1]);
-//      } else {
-//        printf("i2cTask: Master receive failed\n");
-//      }
-//    } else {
-//      printf("i2cTask: Master transmit failed\n");
-//      printf("Error code %d\n", hi2c1.ErrorCode);
-//    }
-//
-//    osDelay(5000);
+  while (true) {
+    transmit = true;
 
-    printf("i2cTask: Slave receive\n");
-    if (HAL_I2C_Slave_Receive_IT(&hi2c1, (uint8_t *) rxBuffer, 2) != HAL_OK) {
-      printf("i2cTask: Slave receive error\n");
-    } else {
-      printf("i2cTask: Receive %s\n", rxBuffer);
-      if (strcmp(rxBuffer, "L1") == 0 || strcmp(rxBuffer, "L0") == 0 ) {
-        HAL_I2C_Slave_Transmit_IT(&hi2c1, (uint8_t *) "OK", 2);
+    LOG_INFO("i2cTask: Wait command");
+    if (HAL_I2C_Slave_Receive_IT(&hi2c1, (uint8_t *) cmdBuffer, 2) != HAL_OK) {
+      LOG_ERROR("i2cTask: Erreur de reception de commande");
+      continue;
+    }
+    LOG_INFO("i2cTask: Command received");
+
+//    LOG_INFO("i2cTask: Wait end transfer");
+//    while (HAL_I2C_GetState(&hi2c1) != HAL_I2C_STATE_READY) {
+//      osDelay(1);
+//    }
+
+    if (cmdBuffer[0] == I2C_CMD_VERSION) {
+      LOG_INFO("i2cTask: Command Version");
+      if (HAL_I2C_Slave_Transmit_IT(&hi2c1, (uint8_t *) FIRMWARE_VERSION, strlen(FIRMWARE_VERSION)) != HAL_OK) {
+        LOG_ERROR("i2cTask: Erreur de transmission de la version");
+        continue;
       }
+
+    } else if (cmdBuffer[0] == I2C_CMD_GET_DATA) {
+      // 0 : Alim 1 current
+      // 1 : Alim 1 tension
+      // 2 : Alim 1 fault
+      // 3 : Alim 2 current
+      // 4 : Alim 2 tension
+      // 5 : Alim 2 fault
+      uint8_t txBuffer[6] = {3, 2 , alim1.fault, 1, 5, alim2.fault};
+      if (HAL_I2C_Slave_Transmit_IT(&hi2c1, txBuffer, 6) != HAL_OK) {
+        LOG_ERROR("i2cTask: Erreur de transmission des données de mesure");
+        continue;
+      }
+
+    } else {
+      LOG_WARN("i2cTask: Invalid command");
+      transmit = false;
     }
 
-    osDelay(5000);
+//    if (transmit) {
+//      LOG_INFO("i2cTask: Wait end transfer for data");
+//      while (HAL_I2C_GetState(&hi2c1) != HAL_I2C_STATE_READY) {
+//        osDelay(1);
+//      }
+//    }
   }
 #pragma clang diagnostic pop
   /* USER CODE END StartI2CTask */
+}
+
+/* USER CODE BEGIN Header_StartIOTask */
+/**
+* @brief Function implementing the ioTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartIOTask */
+void StartIOTask(void *argument)
+{
+  /* USER CODE BEGIN StartIOTask */
+  LOG_INFO("ioTask: Start");
+  /* Infinite loop */
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "EndlessLoop"
+  while (true) {
+    //LOG_INFO("ioTask: Read fault states");
+    alim1.fault = HAL_GPIO_ReadPin(FAULT_1_GPIO_Port, FAULT_1_Pin) == GPIO_PIN_RESET;
+    alim2.fault = HAL_GPIO_ReadPin(FAULT_2_GPIO_Port, FAULT_2_Pin) == GPIO_PIN_RESET;
+    osDelay(2000);
+  }
+#pragma clang diagnostic pop
+  /* USER CODE END StartIOTask */
 }
 
 /* Private application code --------------------------------------------------*/
