@@ -58,6 +58,7 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define I2C_SLAVE_ADDRESS_BASE 0x20
 #define ANA_VOLT_2_Pin GPIO_PIN_0
 #define ANA_VOLT_2_GPIO_Port GPIOA
 #define ANA_CURRENT_2_Pin GPIO_PIN_1
