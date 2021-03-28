@@ -7,10 +7,12 @@
 #include <string.h>
 
 void print(char _char, uint8_t level) {
+#ifdef DEBUG_MODE
   while (ITM->PORT[level].u32 == 0UL) {
     __NOP();
   }
   ITM->PORT[level].u8 = (uint8_t) _char;
+#endif
 }
 
 void println(const char *msg, uint8_t level) {
