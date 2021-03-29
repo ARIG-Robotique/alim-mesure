@@ -94,7 +94,6 @@ void Error_Handler(void);
 #define SDA_Pin GPIO_PIN_7
 #define SDA_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
-#define FIRMWARE_VERSION "2020.03.14"
 #define I2C_CMD_VERSION 'v'
 #define I2C_CMD_GET_DATA 'g'
 /* USER CODE END Private defines */
