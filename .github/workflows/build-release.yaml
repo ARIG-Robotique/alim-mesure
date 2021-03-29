@@ -1,0 +1,27 @@
+name: build-release
+
+on: [push]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install ARM toolchain
+      run: sudo apt-get install gcc-arm-none-eabi binutils-arm-none-eabi 
+
+    - name: Create build directory
+      run: mkdir -p cmake-build-release
+
+    - name: Run a multi-line script
+      shell: bash
+      working-directory: ${{runner.workspace}}/cmake-build-release
+      run: |
+        cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
+        make
