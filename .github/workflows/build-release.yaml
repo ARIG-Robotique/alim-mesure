@@ -19,9 +19,7 @@ jobs:
     - name: Create build directory
       run: mkdir -p cmake-build-release
 
-    - name: Run a multi-line script
-      shell: bash
-      working-directory: ${{runner.workspace}}/cmake-build-release
+    - name: Build firmware
       run: |
         cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
         make
