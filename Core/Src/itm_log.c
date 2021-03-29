@@ -16,6 +16,7 @@ void print(char _char, uint8_t level) {
 }
 
 void println(const char *msg, uint8_t level) {
+#ifdef DEBUG_MODE
   if (msg == NULL || level > 31) {
     return;
   }
@@ -23,4 +24,5 @@ void println(const char *msg, uint8_t level) {
     print(msg[i], level);
   }
   print('\n', level);
+#endif
 }

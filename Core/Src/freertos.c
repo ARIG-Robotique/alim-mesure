@@ -200,16 +200,16 @@ void StartIOTask(void *argument)
     alim2.current = HAL_ADC_GetValue(&hadc1);
     HAL_ADC_Stop(&hadc1);
 
-    char str [100];
-    LOG_INFO("ADC Values");
-    sprintf(str, "Alim 1 (V) : %lu", alim1.tension);
-    LOG_INFO(str);
-    sprintf(str, "Alim 1 (A) : %lu", alim1.current);
-    LOG_INFO(str);
-    sprintf(str, "Alim 2 (V) : %lu", alim2.tension);
-    LOG_INFO(str);
-    sprintf(str, "Alim 2 (A) : %lu", alim2.current);
-    LOG_INFO(str);
+//    char str [100];
+//    LOG_DEBUG("ioTask: ADC Values");
+//    sprintf(str, "ioTask: Alim 1 (V) -> %lu", alim1.tension);
+//    LOG_DEBUG(str);
+//    sprintf(str, "ioTask: Alim 1 (A) -> %lu", alim1.current);
+//    LOG_DEBUG(str);
+//    sprintf(str, "ioTask: Alim 2 (V) -> %lu", alim2.tension);
+//    LOG_DEBUG(str);
+//    sprintf(str, "ioTask: Alim 2 (A) -> %lu", alim2.current);
+//    LOG_DEBUG(str);
 
     osDelay(5000);
   }

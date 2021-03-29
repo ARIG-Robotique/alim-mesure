@@ -182,12 +182,10 @@ void HAL_I2C_AddrCallback(I2C_HandleTypeDef *hi2c, uint8_t TransferDirection, ui
       // 17    : Alim 2 fault
       txBuffer[17] = alim2.fault;
 
-#ifdef DEBUG_MODE
-      for (int i = 0 ; i < sizeof(txBuffer); i++) {
-        sprintf(buf, "i2c: idx %d -> 0x%02X", i, txBuffer[i]);
-        LOG_DEBUG(buf);
-      }
-#endif
+//      for (int i = 0 ; i < sizeof(txBuffer); i++) {
+//        sprintf(buf, "i2c: idx %d -> 0x%02X", i, txBuffer[i]);
+//        LOG_DEBUG(buf);
+//      }
       HAL_I2C_Slave_Seq_Transmit_IT(hi2c, txBuffer, sizeof(txBuffer), I2C_NEXT_FRAME);
     } else {
       LOG_WARN("i2c: Address Callback, unknown command");
