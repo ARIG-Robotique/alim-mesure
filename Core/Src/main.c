@@ -46,7 +46,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+Alimentation alim1;
+Alimentation alim2;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -93,6 +94,8 @@ int main(void)
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
 
+  LOG_INFO("main: Start I²C listener");
+  HAL_I2C_EnableListen_IT( &hi2c1 );
   /* USER CODE END 2 */
 
   /* Init scheduler */

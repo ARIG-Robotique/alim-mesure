@@ -26,12 +26,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "i2c.h"
 #include "adc.h"
 #include "itm_log.h"
-#include <stdbool.h>
-#include <string.h>
-#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,15 +48,6 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 
-typedef struct {
-    uint32_t tension;
-    uint32_t current;
-    bool fault;
-} Alimentation;
-
-Alimentation alim1;
-Alimentation alim2;
-
 /* USER CODE END Variables */
 /* Definitions for heartBeatTask */
 osThreadId_t heartBeatTaskHandle;
@@ -68,13 +55,6 @@ const osThreadAttr_t heartBeatTask_attributes = {
   .name = "heartBeatTask",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
-};
-/* Definitions for i2cTask */
-osThreadId_t i2cTaskHandle;
-const osThreadAttr_t i2cTask_attributes = {
-  .name = "i2cTask",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for ioTask */
 osThreadId_t ioTaskHandle;
@@ -90,7 +70,6 @@ const osThreadAttr_t ioTask_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void StartHeartBeatTask(void *argument);
-void StartI2CTask(void *argument);
 void StartIOTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -124,9 +103,6 @@ void MX_FREERTOS_Init(void) {
   /* Create the thread(s) */
   /* creation of heartBeatTask */
   heartBeatTaskHandle = osThreadNew(StartHeartBeatTask, NULL, &heartBeatTask_attributes);
-
-  /* creation of i2cTask */
-  i2cTaskHandle = osThreadNew(StartI2CTask, NULL, &i2cTask_attributes);
 
   /* creation of ioTask */
   ioTaskHandle = osThreadNew(StartIOTask, NULL, &ioTask_attributes);
@@ -174,95 +150,6 @@ void StartHeartBeatTask(void *argument)
   }
 #pragma clang diagnostic pop
   /* USER CODE END StartHeartBeatTask */
-}
-
-/* USER CODE BEGIN Header_StartI2CTask */
-/**
-* @brief Function implementing the i2cTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartI2CTask */
-void StartI2CTask(void *argument)
-{
-  /* USER CODE BEGIN StartI2CTask */
-  LOG_INFO("i2cTask: Start");
-
-  /* Infinite loop */
-  uint8_t cmdBuffer[2];
-  bool transmit;
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "EndlessLoop"
-  while (true) {
-    transmit = true;
-
-    LOG_INFO("i2cTask: Wait command");
-    if (HAL_I2C_Slave_Receive_IT(&hi2c1, (uint8_t *) cmdBuffer, 2) != HAL_OK) {
-      LOG_ERROR("i2cTask: Erreur de reception de commande");
-      continue;
-    }
-    LOG_INFO("i2cTask: Command received");
-
-//    LOG_INFO("i2cTask: Wait end transfer");
-//    while (HAL_I2C_GetState(&hi2c1) != HAL_I2C_STATE_READY) {
-//      osDelay(1);
-//    }
-
-    if (cmdBuffer[0] == I2C_CMD_VERSION) {
-      LOG_INFO("i2cTask: Command Version");
-      if (HAL_I2C_Slave_Transmit_IT(&hi2c1, (uint8_t *) FIRMWARE_VERSION, strlen(FIRMWARE_VERSION)) != HAL_OK) {
-        LOG_ERROR("i2cTask: Erreur de transmission de la version");
-        continue;
-      }
-
-    } else if (cmdBuffer[0] == I2C_CMD_GET_DATA) {
-      uint8_t txBuffer[18];
-
-      // 0-3   : Alim 1 tension
-      txBuffer[0] = (alim1.tension >> 24) & 0xFF;
-      txBuffer[1] = (alim1.tension >> 16) & 0xFF;
-      txBuffer[2] = (alim1.tension >> 8) & 0xFF;
-      txBuffer[3] = alim1.tension & 0xFF;
-      // 4-7   : Alim 1 current
-      txBuffer[4] = (alim1.current >> 24) & 0xFF;
-      txBuffer[5] = (alim1.current >> 16) & 0xFF;
-      txBuffer[6] = (alim1.current >> 8) & 0xFF;
-      txBuffer[7] = alim1.current & 0xFF;
-      // 8     : Alim 1 fault
-      txBuffer[8] = alim1.fault;
-
-      // 9-12  : Alim 2 tension
-      txBuffer[9] = (alim2.tension >> 24) & 0xFF;
-      txBuffer[10] = (alim2.tension >> 16) & 0xFF;
-      txBuffer[11] = (alim2.tension >> 8) & 0xFF;
-      txBuffer[12] = alim2.tension & 0xFF;
-      // 13-16 : Alim 2 current
-      txBuffer[13] = (alim2.current >> 24) & 0xFF;
-      txBuffer[14] = (alim2.current >> 16) & 0xFF;
-      txBuffer[15] = (alim2.current >> 8) & 0xFF;
-      txBuffer[16] = alim2.current & 0xFF;
-      // 17    : Alim 2 fault
-      txBuffer[17] = alim2.fault;
-
-      if (HAL_I2C_Slave_Transmit_IT(&hi2c1, txBuffer, 18) != HAL_OK) {
-        LOG_ERROR("i2cTask: Erreur de transmission des données de mesure");
-        continue;
-      }
-
-    } else {
-      LOG_WARN("i2cTask: Invalid command");
-      transmit = false;
-    }
-
-//    if (transmit) {
-//      LOG_INFO("i2cTask: Wait end transfer for data");
-//      while (HAL_I2C_GetState(&hi2c1) != HAL_I2C_STATE_READY) {
-//        osDelay(1);
-//      }
-//    }
-  }
-#pragma clang diagnostic pop
-  /* USER CODE END StartI2CTask */
 }
 
 /* USER CODE BEGIN Header_StartIOTask */

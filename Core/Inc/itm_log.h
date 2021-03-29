@@ -10,6 +10,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include <stdio.h>
 #include "stm32f1xx_hal.h"
 
 #define LOG_DEBUG_LEVEL 24

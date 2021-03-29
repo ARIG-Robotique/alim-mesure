@@ -32,11 +32,19 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdbool.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
+typedef struct {
+    uint32_t tension;
+    uint32_t current;
+    bool fault;
+} Alimentation;
+
+extern Alimentation alim1;
+extern Alimentation alim2;
 
 /* USER CODE END ET */
 

@@ -21,7 +21,8 @@
 #include "i2c.h"
 
 /* USER CODE BEGIN 0 */
-
+#include "stdio.h"
+#include "itm_log.h"
 /* USER CODE END 0 */
 
 I2C_HandleTypeDef hi2c1;
@@ -125,6 +126,114 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle)
 }
 
 /* USER CODE BEGIN 1 */
+static uint8_t cmd; 	// index of current cmd
+static uint8_t getCommand = 1;
+void HAL_I2C_ListenCpltCallback(I2C_HandleTypeDef *hi2c)
+{
+  LOG_INFO("Listen Complete Callback");
+  getCommand = true;
+  HAL_I2C_EnableListen_IT(hi2c); // slave is ready again
+}
+
+void HAL_I2C_AddrCallback(I2C_HandleTypeDef *hi2c, uint8_t TransferDirection, uint16_t AddrMatchCode)
+{
+  char buf[100];
+  sprintf(buf, "i2c: Address Callback (Dir : %s ; Get Cmd : %d)", TransferDirection == I2C_DIRECTION_RECEIVE ? "RX" : "TX", getCommand);
+  LOG_INFO(buf);
+  if(TransferDirection == I2C_DIRECTION_TRANSMIT) {
+    if(getCommand) {
+      HAL_I2C_Slave_Seq_Receive_IT(hi2c, &cmd, 1, I2C_NEXT_FRAME);
+    } else {
+      // Implement else when data is received
+      LOG_WARN("i2c: Address Callback, no data needed in this firmware");
+    }
+  } else {
+    if (cmd == I2C_CMD_VERSION) {
+      sprintf(buf, "i2c: Address Callback send version %s", FIRMWARE_VERSION);
+      LOG_INFO("i2c: Address Callback send version");
+      HAL_I2C_Slave_Seq_Transmit_IT(hi2c, FIRMWARE_VERSION, sizeof(FIRMWARE_VERSION), I2C_NEXT_FRAME);
+    } else if (cmd == I2C_CMD_GET_DATA) {
+      LOG_INFO("i2c: Address Callback send ADC data");
+      uint8_t txBuffer[18];
+
+      // 0-3   : Alim 1 tension
+      txBuffer[0] = (alim1.tension >> 24) & 0xFF;
+      txBuffer[1] = (alim1.tension >> 16) & 0xFF;
+      txBuffer[2] = (alim1.tension >> 8) & 0xFF;
+      txBuffer[3] = alim1.tension & 0xFF;
+      // 4-7   : Alim 1 current
+      txBuffer[4] = (alim1.current >> 24) & 0xFF;
+      txBuffer[5] = (alim1.current >> 16) & 0xFF;
+      txBuffer[6] = (alim1.current >> 8) & 0xFF;
+      txBuffer[7] = alim1.current & 0xFF;
+      // 8     : Alim 1 fault
+      txBuffer[8] = alim1.fault;
+
+      // 9-12  : Alim 2 tension
+      txBuffer[9] = (alim2.tension >> 24) & 0xFF;
+      txBuffer[10] = (alim2.tension >> 16) & 0xFF;
+      txBuffer[11] = (alim2.tension >> 8) & 0xFF;
+      txBuffer[12] = alim2.tension & 0xFF;
+      // 13-16 : Alim 2 current
+      txBuffer[13] = (alim2.current >> 24) & 0xFF;
+      txBuffer[14] = (alim2.current >> 16) & 0xFF;
+      txBuffer[15] = (alim2.current >> 8) & 0xFF;
+      txBuffer[16] = alim2.current & 0xFF;
+      // 17    : Alim 2 fault
+      txBuffer[17] = alim2.fault;
+
+#ifdef DEBUG_MODE
+      for (int i = 0 ; i < sizeof(txBuffer); i++) {
+        sprintf(buf, "i2c: idx %d -> 0x%02X", i, txBuffer[i]);
+        LOG_DEBUG(buf);
+      }
+#endif
+      HAL_I2C_Slave_Seq_Transmit_IT(hi2c, txBuffer, sizeof(txBuffer), I2C_NEXT_FRAME);
+    } else {
+      LOG_WARN("i2c: Address Callback, unknown command");
+    }
+  }
+}
+
+void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c)
+{
+  if(getCommand) {
+    char buf[100];
+    sprintf(buf, "i2c: RX complete Callback -> Command = %hhu", cmd);
+    LOG_INFO(buf);
+    getCommand = false;
+  } else {
+    // Implement else if received value from command
+    LOG_WARN("i2c: RX complete Callback, no command");
+  }
+}
+
+void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *hi2c)
+{
+  char buf[100];
+  sprintf(buf, "i2c: TX complete Callback -> Command = %hhu", cmd);
+  LOG_INFO(buf);
+}
+
+void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c)
+{
+  uint32_t errorCode = HAL_I2C_GetError(hi2c);
+  if( errorCode == HAL_I2C_ERROR_AF ) {
+    // transaction terminated by master
+    LOG_ERROR("i2c: Error Callback -> transaction terminated by master" );
+  } else {
+    char buf[100];
+    sprintf(buf, "i2c: Error Callback -> err=0x%02lX", errorCode);
+    LOG_ERROR(buf);
+  }
+  getCommand = true;
+  cmd = 0;
+}
+
+void HAL_I2C_AbortCpltCallback(I2C_HandleTypeDef *hi2c)
+{
+  LOG_INFO("i2c: Abort comptete callback" );  // never seen...
+}
 
 /* USER CODE END 1 */
 
