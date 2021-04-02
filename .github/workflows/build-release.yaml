@@ -20,6 +20,7 @@ jobs:
       run: sudo apt-get install gcc-arm-none-eabi binutils-arm-none-eabi
 
     - name: Build firmware
+      id: build
       run: |
         mkdir -p cmake-build-release
         cd cmake-build-release
