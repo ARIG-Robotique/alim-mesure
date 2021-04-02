@@ -172,43 +172,49 @@ void StartIOTask(void *argument)
     alim1.fault = HAL_GPIO_ReadPin(FAULT_1_GPIO_Port, FAULT_1_Pin) == GPIO_PIN_RESET;
     alim2.fault = HAL_GPIO_ReadPin(FAULT_2_GPIO_Port, FAULT_2_Pin) == GPIO_PIN_RESET;
 
+    uint32_t rawAdc;
+
     LOG_INFO("ioTask: Read ADC Alim 1 Volt");
     adcSelectAlim1Volt();
     HAL_ADC_Start(&hadc1);
     HAL_ADC_PollForConversion(&hadc1, 1000);
-    alim1.tension = HAL_ADC_GetValue(&hadc1);
+    rawAdc = HAL_ADC_GetValue(&hadc1);
     HAL_ADC_Stop(&hadc1);
+    alim1.tension = (rawAdc / ADC_RESOLUTION) * (V_REF / DIVISEUR_TENSION);
 
     LOG_INFO("ioTask: Read ADC Alim 1 Current");
     adcSelectAlim1Current();
     HAL_ADC_Start(&hadc1);
     HAL_ADC_PollForConversion(&hadc1, 1000);
-    alim1.current = HAL_ADC_GetValue(&hadc1);
+    rawAdc = HAL_ADC_GetValue(&hadc1);
     HAL_ADC_Stop(&hadc1);
+    alim1.current = (rawAdc / ADC_RESOLUTION) * V_REF * ACS_RESOLUTION;
 
     LOG_INFO("ioTask: Read ADC Alim 2 Volt");
     adcSelectAlim2Volt();
     HAL_ADC_Start(&hadc1);
     HAL_ADC_PollForConversion(&hadc1, 1000);
-    alim2.tension = HAL_ADC_GetValue(&hadc1);
+    rawAdc = HAL_ADC_GetValue(&hadc1);
     HAL_ADC_Stop(&hadc1);
+    alim2.tension = (rawAdc / ADC_RESOLUTION) * (V_REF / DIVISEUR_TENSION);
 
     LOG_INFO("ioTask: Read ADC Alim 2 Current");
     adcSelectAlim2Current();
     HAL_ADC_Start(&hadc1);
     HAL_ADC_PollForConversion(&hadc1, 1000);
-    alim2.current = HAL_ADC_GetValue(&hadc1);
+    rawAdc = HAL_ADC_GetValue(&hadc1);
     HAL_ADC_Stop(&hadc1);
+    alim2.current = (rawAdc / ADC_RESOLUTION) * V_REF * ACS_RESOLUTION;
 
 //    char str [100];
 //    LOG_DEBUG("ioTask: ADC Values");
-//    sprintf(str, "ioTask: Alim 1 (V) -> %lu", alim1.tension);
+//    sprintf(str, "ioTask: Alim 1 (V) -> %d", alim1.tension * 100);
 //    LOG_DEBUG(str);
-//    sprintf(str, "ioTask: Alim 1 (A) -> %lu", alim1.current);
+//    sprintf(str, "ioTask: Alim 1 (A) -> %d", alim1.current * 100);
 //    LOG_DEBUG(str);
-//    sprintf(str, "ioTask: Alim 2 (V) -> %lu", alim2.tension);
+//    sprintf(str, "ioTask: Alim 2 (V) -> %d", alim2.tension * 100);
 //    LOG_DEBUG(str);
-//    sprintf(str, "ioTask: Alim 2 (A) -> %lu", alim2.current);
+//    sprintf(str, "ioTask: Alim 2 (A) -> %d", alim2.current * 100);
 //    LOG_DEBUG(str);
 
     osDelay(5000);

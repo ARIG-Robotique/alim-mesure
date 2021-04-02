@@ -154,33 +154,28 @@ void HAL_I2C_AddrCallback(I2C_HandleTypeDef *hi2c, uint8_t TransferDirection, ui
       HAL_I2C_Slave_Seq_Transmit_IT(hi2c, FIRMWARE_VERSION, sizeof(FIRMWARE_VERSION), I2C_NEXT_FRAME);
     } else if (cmd == I2C_CMD_GET_DATA) {
       LOG_INFO("i2c: Address Callback send ADC data");
-      uint8_t txBuffer[18];
+      uint8_t txBuffer[9];
+      uint16_t tension, current;
 
-      // 0-3   : Alim 1 tension
-      txBuffer[0] = (alim1.tension >> 24) & 0xFF;
-      txBuffer[1] = (alim1.tension >> 16) & 0xFF;
-      txBuffer[2] = (alim1.tension >> 8) & 0xFF;
-      txBuffer[3] = alim1.tension & 0xFF;
-      // 4-7   : Alim 1 current
-      txBuffer[4] = (alim1.current >> 24) & 0xFF;
-      txBuffer[5] = (alim1.current >> 16) & 0xFF;
-      txBuffer[6] = (alim1.current >> 8) & 0xFF;
-      txBuffer[7] = alim1.current & 0xFF;
-      // 8     : Alim 1 fault
-      txBuffer[8] = alim1.fault;
+      // 0-1   : Alim 1 tension
+      tension = alim1.tension * 100;
+      txBuffer[0] = (tension >> 8) & 0xFF;
+      txBuffer[1] = tension & 0xFF;
+      // 2-3   : Alim 1 current
+      current = alim1.current * 100;
+      txBuffer[2] = (current >> 8) & 0xFF;
+      txBuffer[3] = current & 0xFF;
 
-      // 9-12  : Alim 2 tension
-      txBuffer[9] = (alim2.tension >> 24) & 0xFF;
-      txBuffer[10] = (alim2.tension >> 16) & 0xFF;
-      txBuffer[11] = (alim2.tension >> 8) & 0xFF;
-      txBuffer[12] = alim2.tension & 0xFF;
-      // 13-16 : Alim 2 current
-      txBuffer[13] = (alim2.current >> 24) & 0xFF;
-      txBuffer[14] = (alim2.current >> 16) & 0xFF;
-      txBuffer[15] = (alim2.current >> 8) & 0xFF;
-      txBuffer[16] = alim2.current & 0xFF;
-      // 17    : Alim 2 fault
-      txBuffer[17] = alim2.fault;
+      // 4-5  : Alim 2 tension
+      tension = alim2.tension * 100;
+      txBuffer[4] = (tension >> 8) & 0xFF;
+      txBuffer[5] = tension & 0xFF;
+      // 6-7 : Alim 2 current
+      current = alim2.current * 100;
+      txBuffer[6] = (current >> 8) & 0xFF;
+      txBuffer[7] = current & 0xFF;
+      // 8    : 0 0 0 0 0 0 Alim 2 fault Alim 1 fault
+      txBuffer[8] = (alim2.fault << 1) + alim1.fault;
 
 //      for (int i = 0 ; i < sizeof(txBuffer); i++) {
 //        sprintf(buf, "i2c: idx %d -> 0x%02X", i, txBuffer[i]);

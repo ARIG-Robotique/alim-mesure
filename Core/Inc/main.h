@@ -38,8 +38,8 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 typedef struct {
-    uint32_t tension;
-    uint32_t current;
+    double tension;
+    double current;
     bool fault;
 } Alimentation;
 
@@ -93,7 +93,23 @@ void Error_Handler(void);
 #define SCL_GPIO_Port GPIOB
 #define SDA_Pin GPIO_PIN_7
 #define SDA_GPIO_Port GPIOB
+
 /* USER CODE BEGIN Private defines */
+// Tension d'alimentation de référence
+#define V_REF 3.3
+
+// Résolution des convertisseurs ADC de la STM32F103C8
+#define ADC_RESOLUTION 4096.0
+
+// Valeur de convertion du pont diviseur de tension (13.6 V => 3.3 V)
+// R1 = 1.8K ; R2 = 5.6K
+// Vo = Vi * R1 / (R1 + R2) = Vi * 0.243243243
+#define DIVISEUR_TENSION 0.243243243
+
+// Résolution pour le courant de l'ACS711 15A alimenté en 3.3V, 90mV / A
+#define ACS_RESOLUTION 90.0/1000.0
+
+// Commande I2C
 #define I2C_CMD_VERSION 'v'
 #define I2C_CMD_GET_DATA 'g'
 /* USER CODE END Private defines */
