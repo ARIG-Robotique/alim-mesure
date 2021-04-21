@@ -39,9 +39,9 @@ void MX_I2C1_Init(void)
   // Lecture des flags pour l'adresse I2C
   int i2cSlaveAddress = I2C_SLAVE_ADDRESS_BASE << 1;
   // Uncomment to use pin to change I2C address
-  //i2cSlaveAddress += HAL_GPIO_ReadPin(I2C_ADD_1_GPIO_Port, I2C_ADD_1_Pin) == GPIO_PIN_SET ? 1 : 0;
-  //i2cSlaveAddress += HAL_GPIO_ReadPin(I2C_ADD_2_GPIO_Port, I2C_ADD_2_Pin) == GPIO_PIN_SET ? 2 : 0;
+  //i2cSlaveAddress += HAL_GPIO_ReadPin(I2C_ADD_1_GPIO_Port, I2C_ADD_1_Pin) == GPIO_PIN_SET ? 2 : 0;
   //i2cSlaveAddress += HAL_GPIO_ReadPin(I2C_ADD_2_GPIO_Port, I2C_ADD_2_Pin) == GPIO_PIN_SET ? 4 : 0;
+  //i2cSlaveAddress += HAL_GPIO_ReadPin(I2C_ADD_3_GPIO_Port, I2C_ADD_3_Pin) == GPIO_PIN_SET ? 8 : 0;
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
@@ -127,7 +127,7 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle)
 
 /* USER CODE BEGIN 1 */
 static uint8_t cmd; 	// index of current cmd
-static uint8_t getCommand = 1;
+static uint8_t getCommand = true;
 void HAL_I2C_ListenCpltCallback(I2C_HandleTypeDef *hi2c)
 {
   LOG_INFO("Listen Complete Callback");

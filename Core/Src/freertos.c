@@ -128,6 +128,7 @@ void StartHeartBeatTask(void *argument)
 {
   /* USER CODE BEGIN StartHeartBeatTask */
   LOG_INFO("heartBeatTask: Start");
+
   /* Infinite loop */
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "EndlessLoop"
@@ -163,8 +164,8 @@ void StartIOTask(void *argument)
 {
   /* USER CODE BEGIN StartIOTask */
   LOG_INFO("ioTask: Start");
-  /* Infinite loop */
 
+  /* Infinite loop */
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "EndlessLoop"
   while (true) {

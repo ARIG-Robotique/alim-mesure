@@ -95,7 +95,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   LOG_INFO("main: Start I²C listener");
-  HAL_I2C_EnableListen_IT( &hi2c1 );
+  HAL_I2C_EnableListen_IT(&hi2c1);
   /* USER CODE END 2 */
 
   /* Init scheduler */
