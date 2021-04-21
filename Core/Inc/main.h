@@ -93,7 +93,6 @@ void Error_Handler(void);
 #define SCL_GPIO_Port GPIOB
 #define SDA_Pin GPIO_PIN_7
 #define SDA_GPIO_Port GPIOB
-
 /* USER CODE BEGIN Private defines */
 // Tension d'alimentation de référence
 #define V_REF 3.3
