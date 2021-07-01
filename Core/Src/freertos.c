@@ -49,19 +49,17 @@
 /* USER CODE BEGIN Variables */
 
 /* USER CODE END Variables */
-/* Definitions for heartBeatTask */
-osThreadId_t heartBeatTaskHandle;
-const osThreadAttr_t heartBeatTask_attributes = {
-  .name = "heartBeatTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+/* Definitions for mainTask */
+osThreadId_t mainTaskHandle;
+const osThreadAttr_t mainTask_attributes = {
+        .name = "mainTask",
+        .stack_size = 256 * 4,
+        .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for ioTask */
-osThreadId_t ioTaskHandle;
-const osThreadAttr_t ioTask_attributes = {
-  .name = "ioTask",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+/* Definitions for heartBeatTimer */
+osTimerId_t heartBeatTimerHandle;
+const osTimerAttr_t heartBeatTimer_attributes = {
+        .name = "heartBeatTimer"
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -69,8 +67,9 @@ const osThreadAttr_t ioTask_attributes = {
 
 /* USER CODE END FunctionPrototypes */
 
-void StartHeartBeatTask(void *argument);
-void StartIOTask(void *argument);
+void StartMainTask(void *argument);
+
+void heartBeatCallback(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -92,6 +91,10 @@ void MX_FREERTOS_Init(void) {
   /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
 
+  /* Create the timer(s) */
+  /* creation of heartBeatTimer */
+  heartBeatTimerHandle = osTimerNew(heartBeatCallback, osTimerPeriodic, NULL, &heartBeatTimer_attributes);
+
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
@@ -101,11 +104,8 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of heartBeatTask */
-  heartBeatTaskHandle = osThreadNew(StartHeartBeatTask, NULL, &heartBeatTask_attributes);
-
-  /* creation of ioTask */
-  ioTaskHandle = osThreadNew(StartIOTask, NULL, &ioTask_attributes);
+  /* creation of mainTask */
+  mainTaskHandle = osThreadNew(StartMainTask, NULL, &mainTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -117,53 +117,19 @@ void MX_FREERTOS_Init(void) {
 
 }
 
-/* USER CODE BEGIN Header_StartHeartBeatTask */
+/* USER CODE BEGIN Header_StartMainTask */
 /**
-* @brief Function implementing the heartBeatTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartHeartBeatTask */
-void StartHeartBeatTask(void *argument)
-{
-  /* USER CODE BEGIN StartHeartBeatTask */
-  LOG_INFO("heartBeatTask: Start");
+  * @brief  Function implementing the mainTask thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_StartMainTask */
+void StartMainTask(void *argument) {
+  /* USER CODE BEGIN StartMainTask */
+  LOG_INFO("mainTask: Start");
 
-  /* Infinite loop */
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "EndlessLoop"
-  while (true) {
-    if (!alim1.fault && !alim2.fault) {
-      //LOG_INFO("heartBeatTask: Toggle LED");
-      HAL_GPIO_TogglePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin);
-      osDelay(1000);
-    } else {
-      LOG_INFO("heartBeatTask: Fault blink");
-      HAL_GPIO_WritePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin, GPIO_PIN_RESET);
-      osDelay(100);
-      for (int i = 0; i < 6; i++) {
-        HAL_GPIO_TogglePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin);
-        osDelay(100);
-      }
-      HAL_GPIO_WritePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin, GPIO_PIN_RESET);
-      osDelay(5000);
-    }
-  }
-#pragma clang diagnostic pop
-  /* USER CODE END StartHeartBeatTask */
-}
-
-/* USER CODE BEGIN Header_StartIOTask */
-/**
-* @brief Function implementing the ioTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartIOTask */
-void StartIOTask(void *argument)
-{
-  /* USER CODE BEGIN StartIOTask */
-  LOG_INFO("ioTask: Start");
+  // Start timers after boot init
+  osTimerStart(heartBeatTimerHandle, 1000);
 
   /* Infinite loop */
 #pragma clang diagnostic push
@@ -207,21 +173,33 @@ void StartIOTask(void *argument)
     HAL_ADC_Stop(&hadc1);
     alim2.current = (rawAdc / ADC_RESOLUTION) * V_REF * ACS_RESOLUTION;
 
-//    char str [100];
-//    LOG_DEBUG("ioTask: ADC Values");
-//    sprintf(str, "ioTask: Alim 1 (V) -> %d", alim1.tension * 100);
-//    LOG_DEBUG(str);
-//    sprintf(str, "ioTask: Alim 1 (A) -> %d", alim1.current * 100);
-//    LOG_DEBUG(str);
-//    sprintf(str, "ioTask: Alim 2 (V) -> %d", alim2.tension * 100);
-//    LOG_DEBUG(str);
-//    sprintf(str, "ioTask: Alim 2 (A) -> %d", alim2.current * 100);
-//    LOG_DEBUG(str);
-
-    osDelay(5000);
+    osDelay(1000);
   }
 #pragma clang diagnostic pop
-  /* USER CODE END StartIOTask */
+  /* USER CODE END StartMainTask */
+}
+
+/* heartBeatCallback function */
+void heartBeatCallback(void *argument) {
+  /* USER CODE BEGIN heartBeatCallback */
+  if (i2cErrorCode == HAL_I2C_ERROR_NONE && !alim1.fault && !alim2.fault) { // Pas d'erreur
+    HAL_GPIO_TogglePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin);
+
+  } else if (i2cErrorCode != HAL_I2C_ERROR_NONE && !alim1.fault && !alim2.fault) { // Erreur I2C
+    HAL_GPIO_WritePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin, GPIO_PIN_RESET);
+    osDelay(1000);
+    for (uint32_t i = 0 ; i < i2cErrorCode * 2 ; i++) {
+      HAL_GPIO_TogglePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin);
+      osDelay(250);
+    }
+    HAL_GPIO_WritePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin, GPIO_PIN_RESET);
+  } else {
+    HAL_GPIO_WritePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin, GPIO_PIN_RESET);
+    osDelay(5000);
+    HAL_GPIO_WritePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin, GPIO_PIN_SET);
+    osDelay(5000);
+  }
+  /* USER CODE END heartBeatCallback */
 }
 
 /* Private application code --------------------------------------------------*/

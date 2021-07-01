@@ -21,6 +21,7 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "adc.h"
+#include "dma.h"
 #include "i2c.h"
 #include "gpio.h"
 
@@ -48,6 +49,8 @@
 /* USER CODE BEGIN PV */
 Alimentation alim1;
 Alimentation alim2;
+
+uint32_t i2cErrorCode;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -90,6 +93,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_ADC1_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */

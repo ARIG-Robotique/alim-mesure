@@ -46,6 +46,8 @@ typedef struct {
 extern Alimentation alim1;
 extern Alimentation alim2;
 
+extern uint32_t i2cErrorCode;
+
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/

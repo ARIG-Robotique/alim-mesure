@@ -23,9 +23,12 @@
 /* USER CODE BEGIN 0 */
 #include "stdio.h"
 #include "itm_log.h"
+
 /* USER CODE END 0 */
 
 I2C_HandleTypeDef hi2c1;
+DMA_HandleTypeDef hdma_i2c1_rx;
+DMA_HandleTypeDef hdma_i2c1_tx;
 
 /* I2C1 init function */
 void MX_I2C1_Init(void)
@@ -86,6 +89,39 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
     /* I2C1 clock enable */
     __HAL_RCC_I2C1_CLK_ENABLE();
 
+    /* I2C1 DMA Init */
+    /* I2C1_RX Init */
+    hdma_i2c1_rx.Instance = DMA1_Channel7;
+    hdma_i2c1_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    hdma_i2c1_rx.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_i2c1_rx.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_i2c1_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+    hdma_i2c1_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+    hdma_i2c1_rx.Init.Mode = DMA_NORMAL;
+    hdma_i2c1_rx.Init.Priority = DMA_PRIORITY_HIGH;
+    if (HAL_DMA_Init(&hdma_i2c1_rx) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    __HAL_LINKDMA(i2cHandle,hdmarx,hdma_i2c1_rx);
+
+    /* I2C1_TX Init */
+    hdma_i2c1_tx.Instance = DMA1_Channel6;
+    hdma_i2c1_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
+    hdma_i2c1_tx.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_i2c1_tx.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_i2c1_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+    hdma_i2c1_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+    hdma_i2c1_tx.Init.Mode = DMA_NORMAL;
+    hdma_i2c1_tx.Init.Priority = DMA_PRIORITY_HIGH;
+    if (HAL_DMA_Init(&hdma_i2c1_tx) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    __HAL_LINKDMA(i2cHandle,hdmatx,hdma_i2c1_tx);
+
     /* I2C1 interrupt Init */
     HAL_NVIC_SetPriority(I2C1_EV_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(I2C1_EV_IRQn);
@@ -116,6 +152,10 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle)
 
     HAL_GPIO_DeInit(SDA_GPIO_Port, SDA_Pin);
 
+    /* I2C1 DMA DeInit */
+    HAL_DMA_DeInit(i2cHandle->hdmarx);
+    HAL_DMA_DeInit(i2cHandle->hdmatx);
+
     /* I2C1 interrupt Deinit */
     HAL_NVIC_DisableIRQ(I2C1_EV_IRQn);
     HAL_NVIC_DisableIRQ(I2C1_ER_IRQn);
@@ -126,34 +166,31 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle)
 }
 
 /* USER CODE BEGIN 1 */
-static uint8_t cmd; 	// index of current cmd
-static uint8_t getCommand = true;
-void HAL_I2C_ListenCpltCallback(I2C_HandleTypeDef *hi2c)
-{
-  LOG_INFO("Listen Complete Callback");
-  getCommand = true;
+static uint8_t cmd;  // index of current cmd
+
+void HAL_I2C_ListenCpltCallback(I2C_HandleTypeDef *hi2c) {
+  char buf[100];
+  sprintf(buf, "i2c: Listen Complete Callback -> Command 0x%02X", cmd);
+  LOG_INFO(buf);
   HAL_I2C_EnableListen_IT(hi2c); // slave is ready again
 }
 
-void HAL_I2C_AddrCallback(I2C_HandleTypeDef *hi2c, uint8_t TransferDirection, uint16_t AddrMatchCode)
-{
+void HAL_I2C_AddrCallback(I2C_HandleTypeDef *hi2c, uint8_t TransferDirection, uint16_t AddrMatchCode) {
   char buf[100];
-  sprintf(buf, "i2c: Address Callback (Dir : %s ; Get Cmd : %d)", TransferDirection == I2C_DIRECTION_RECEIVE ? "RX" : "TX", getCommand);
+  sprintf(buf, "i2c: Address Callback (Dir : %s)", TransferDirection == I2C_DIRECTION_RECEIVE ? "RX" : "TX");
   LOG_INFO(buf);
-  if(TransferDirection == I2C_DIRECTION_TRANSMIT) {
-    if(getCommand) {
-      HAL_I2C_Slave_Seq_Receive_IT(hi2c, &cmd, 1, I2C_NEXT_FRAME);
-    } else {
-      // Implement else when data is received
-      LOG_WARN("i2c: Address Callback, no data needed in this firmware");
-    }
+
+  if (TransferDirection == I2C_DIRECTION_TRANSMIT) {
+      HAL_I2C_Slave_Seq_Receive_DMA(hi2c, &cmd, 1, I2C_FIRST_FRAME);
+
   } else {
     if (cmd == I2C_CMD_VERSION) {
       sprintf(buf, "i2c: Address Callback send version %s", FIRMWARE_VERSION);
-      LOG_INFO("i2c: Address Callback send version");
-      HAL_I2C_Slave_Seq_Transmit_IT(hi2c, FIRMWARE_VERSION, sizeof(FIRMWARE_VERSION), I2C_NEXT_FRAME);
+      LOG_INFO(buf);
+      HAL_I2C_Slave_Seq_Transmit_DMA(hi2c, FIRMWARE_VERSION, sizeof(FIRMWARE_VERSION), I2C_NEXT_FRAME);
+
     } else if (cmd == I2C_CMD_GET_DATA) {
-      LOG_INFO("i2c: Address Callback send ADC data");
+      LOG_INFO("i2c: Address Callback send all ADC data");
       uint8_t txBuffer[9];
       uint16_t tension, current;
 
@@ -177,55 +214,40 @@ void HAL_I2C_AddrCallback(I2C_HandleTypeDef *hi2c, uint8_t TransferDirection, ui
       // 8    : 0 0 0 0 0 0 Alim 2 fault Alim 1 fault
       txBuffer[8] = (alim2.fault << 1) + alim1.fault;
 
-//      for (int i = 0 ; i < sizeof(txBuffer); i++) {
-//        sprintf(buf, "i2c: idx %d -> 0x%02X", i, txBuffer[i]);
-//        LOG_DEBUG(buf);
-//      }
-      HAL_I2C_Slave_Seq_Transmit_IT(hi2c, txBuffer, sizeof(txBuffer), I2C_NEXT_FRAME);
+      HAL_I2C_Slave_Seq_Transmit_DMA(hi2c, txBuffer, sizeof(txBuffer), I2C_NEXT_FRAME);
+
     } else {
       LOG_WARN("i2c: Address Callback, unknown command");
     }
   }
 }
 
-void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c)
-{
-  if(getCommand) {
-    char buf[100];
-    sprintf(buf, "i2c: RX complete Callback -> Command = %hhu", cmd);
-    LOG_INFO(buf);
-    getCommand = false;
-  } else {
-    // Implement else if received value from command
-    LOG_WARN("i2c: RX complete Callback, no command");
-  }
-}
-
-void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *hi2c)
-{
+void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c) {
   char buf[100];
-  sprintf(buf, "i2c: TX complete Callback -> Command = %hhu", cmd);
+  sprintf(buf, "i2c: RX complete Callback -> Command = 0x%02X", cmd);
   LOG_INFO(buf);
 }
 
-void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c)
-{
-  uint32_t errorCode = HAL_I2C_GetError(hi2c);
-  if( errorCode == HAL_I2C_ERROR_AF ) {
-    // transaction terminated by master
-    LOG_ERROR("i2c: Error Callback -> transaction terminated by master" );
-  } else {
-    char buf[100];
-    sprintf(buf, "i2c: Error Callback -> err=0x%02lX", errorCode);
-    LOG_ERROR(buf);
-  }
-  getCommand = true;
-  cmd = 0;
+void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *hi2c) {
+  char buf[100];
+  sprintf(buf, "i2c: TX complete Callback -> Command = 0x%02X", cmd);
+  LOG_INFO(buf);
 }
 
-void HAL_I2C_AbortCpltCallback(I2C_HandleTypeDef *hi2c)
-{
-  LOG_INFO("i2c: Abort comptete callback" );  // never seen...
+void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c) {
+  i2cErrorCode = HAL_I2C_GetError(hi2c);
+  if (i2cErrorCode == HAL_I2C_ERROR_AF) {
+    // transaction terminated by master
+    LOG_ERROR("i2c: Error Callback -> transaction terminated by master");
+  } else {
+    char buf[100];
+    sprintf(buf, "i2c: Error Callback -> err=0x%02lX", i2cErrorCode);
+    LOG_ERROR(buf);
+  }
+}
+
+void HAL_I2C_AbortCpltCallback(I2C_HandleTypeDef *hi2c) {
+  LOG_INFO("i2c: Abort comptete callback");  // never seen...
 }
 
 /* USER CODE END 1 */
