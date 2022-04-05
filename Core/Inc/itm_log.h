@@ -18,6 +18,8 @@ extern "C" {
 #define LOG_WARN_LEVEL 26
 #define LOG_ERROR_LEVEL 27
 
+#define LOG_LEVEL_MIN LOG_WARN_LEVEL
+
 #define LOG_DEBUG(msg) println(msg, LOG_DEBUG_LEVEL)
 #define LOG_INFO(msg) println(msg, LOG_INFO_LEVEL)
 #define LOG_WARN(msg) println(msg, LOG_WARN_LEVEL)
