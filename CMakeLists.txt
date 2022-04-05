@@ -19,8 +19,14 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 
 # Define FIRMWARE_VERSION
+execute_process(
+    COMMAND git log -1 --format=%h
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+    OUTPUT_VARIABLE GIT_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 string(TIMESTAMP VERSION "%Y.%m.%d")
-add_definitions(-DFIRMWARE_VERSION="${VERSION}")
+add_definitions(-DFIRMWARE_VERSION="${VERSION}-${GIT_HASH}")
 
 #Uncomment for hardware floating point
 #add_compile_definitions(ARM_MATH_CM4;ARM_MATH_MATRIX_CHECK;ARM_MATH_ROUNDING)
