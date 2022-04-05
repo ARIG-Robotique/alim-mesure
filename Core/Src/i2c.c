@@ -218,6 +218,11 @@ void HAL_I2C_AddrCallback(I2C_HandleTypeDef *hi2c, uint8_t TransferDirection, ui
 
     } else {
       LOG_WARN("i2c: Address Callback, unknown command");
+      sprintf(buf, "i2c: Address Callback (Dir : %s) : Command = 0x%02X", TransferDirection == I2C_DIRECTION_RECEIVE ? "RX" : "TX", rxBuffer[0]);
+      LOG_WARN(buf);
+
+      uint8_t txBuffer[1] = {0xFF};
+      HAL_I2C_Slave_Seq_Transmit_DMA(hi2c, txBuffer, 1, I2C_LAST_FRAME);
     }
   }
 }
@@ -236,14 +241,65 @@ void HAL_I2C_SlaveTxCpltCallback(I2C_HandleTypeDef *hi2c) {
 
 void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c) {
   i2cErrorCode = HAL_I2C_GetError(hi2c);
-  if (i2cErrorCode == HAL_I2C_ERROR_AF) {
-    // transaction terminated by master
-    LOG_ERROR("i2c: Error Callback -> transaction terminated by master");
+  if (i2cErrorCode == HAL_I2C_ERROR_BERR) {
+    // Bus error: This error happens when the interface detects an SDA’s rising or falling edge
+    // while SCL is high, occurring in a non-valid position during a byte transfer.
+    // During the byte transfer, if any invalid transition happens on the SDA line,
+    // then the bus error is triggered, and the bus error flag in the status register will be set,
+    // and if the interrupt is enabled, then an interrupt will be triggered on the interrupt IRQ line.
+    LOG_WARN("i2c: Error Callback -> BUS Error");
+
+  } else if (i2cErrorCode == HAL_I2C_ERROR_ARLO) {
+    // Arbitration loss error: This error can occur when the interface loses the arbitration
+    // of the bus to another master. Basically, arbitration loss error may happen only in the
+    // multi-master bus configuration. The circuit having multiple masters is known as multi-master
+    // configuration.
+    LOG_WARN("i2c: Error Callback -> Arbitration loss error");
+
+  } else if (i2cErrorCode == HAL_I2C_ERROR_AF) {
+    // ACK failure error: This error occurs when no ACK is returned for the byte sent.
+    LOG_WARN("i2c: Error Callback -> ACK failure error");
+
+  } else if (i2cErrorCode == HAL_I2C_ERROR_OVR) {
+    // Overrun error: Remember that the overrun always happens during the reception. When a new byte
+    // is received before reading the previously received values in the data register, the newly
+    // received data will be lost. In such cases, the overrun error occurs.
+    //
+    // For example, consider that there is one data register (DR) and a shift register (SR) in I2C.
+    // The software reads the data from the data register. When SR receives one byte, it is moved
+    // to the DR. Now assume that DR is full, one byte that is not yet read by the software is
+    // already there in the DR, and the second byte is received in the SR. Now the SR has the second
+    // byte, and DR has the first data byte. When the third byte comes, the I2C peripheral discards
+    // the third byte since there is no place to keep the third byte received. This condition is
+    // called overrun.
+    //
+    // The overrun error will not occur in I2C if clock stretching is enabled because this error
+    // happens only when both the DR and SR register is filled. Another flag called BTF is set
+    // immediately, indicating that both SR and DR registers are full, and the clock will be stretched
+    // automatically. When the clock is stretched, both slave and master enter into the waiting state.
+    // The BTF flag will get cleared only when the software reads a byte from the data register.
+    //
+    // If the clock stretching feature is not supported by the I2C peripheral, then overrun error
+    // may happen, and the software has to be careful with that.
+    //
+    // Note: In I2C, the overrun and underrun will not happen if clock stretching is enabled because
+    // in those conditions, the clock will be held LOW, and both communicating devices will enter
+    // the wait state.
+    LOG_WARN("i2c: Error Callback -> Overrun error");
+
+  } else if (i2cErrorCode == HAL_I2C_ERROR_TIMEOUT) {
+    // Time-Out error: The time-out error occurs when the master or slave stretches the clock by holding it low for more than the recommended amount of time. The recommended amount of time will be mentioned in the reference manual. If the stretching of the clock to low exceeds the recommended amount of time, then the time-out error will be triggered by the I2C peripheral.
+    LOG_WARN("i2c: Error Callback -> Time-Out error");
+
   } else {
     char buf[100];
     sprintf(buf, "i2c: Error Callback -> err=0x%02lX", i2cErrorCode);
     LOG_ERROR(buf);
   }
+
+  LOG_WARN("i2c: Error Callback -> restart I2C");
+  HAL_I2C_MspDeInit(hi2c);
+  HAL_I2C_MspInit(hi2c);
 }
 
 void HAL_I2C_AbortCpltCallback(I2C_HandleTypeDef *hi2c) {
