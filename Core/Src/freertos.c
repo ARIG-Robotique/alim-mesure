@@ -52,14 +52,14 @@
 /* Definitions for mainTask */
 osThreadId_t mainTaskHandle;
 const osThreadAttr_t mainTask_attributes = {
-        .name = "mainTask",
-        .stack_size = 256 * 4,
-        .priority = (osPriority_t) osPriorityNormal,
+  .name = "mainTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for heartBeatTimer */
 osTimerId_t heartBeatTimerHandle;
 const osTimerAttr_t heartBeatTimer_attributes = {
-        .name = "heartBeatTimer"
+  .name = "heartBeatTimer"
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -68,7 +68,6 @@ const osTimerAttr_t heartBeatTimer_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void StartMainTask(void *argument);
-
 void heartBeatCallback(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -124,7 +123,8 @@ void MX_FREERTOS_Init(void) {
   * @retval None
   */
 /* USER CODE END Header_StartMainTask */
-void StartMainTask(void *argument) {
+void StartMainTask(void *argument)
+{
   /* USER CODE BEGIN StartMainTask */
   LOG_INFO("mainTask: Start");
 
@@ -180,7 +180,8 @@ void StartMainTask(void *argument) {
 }
 
 /* heartBeatCallback function */
-void heartBeatCallback(void *argument) {
+void heartBeatCallback(void *argument)
+{
   /* USER CODE BEGIN heartBeatCallback */
   if (i2cErrorCode == HAL_I2C_ERROR_NONE && !alim1.fault && !alim2.fault) { // Pas d'erreur
     HAL_GPIO_TogglePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin);
@@ -207,4 +208,3 @@ void heartBeatCallback(void *argument) {
 
 /* USER CODE END Application */
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
