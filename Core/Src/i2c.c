@@ -169,10 +169,28 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle)
 static uint8_t cmd;  // index of current cmd
 
 void HAL_I2C_ListenCpltCallback(I2C_HandleTypeDef *hi2c) {
+  if (i2cErrorCode == HAL_I2C_ERROR_BERR) {
+    __HAL_I2C_CLEAR_FLAG(hi2c, I2C_FLAG_BERR);
+    LOG_WARN("i2c: Listen Complete Callback -> flag BERR cleared");
+
+  } else if (i2cErrorCode == HAL_I2C_ERROR_ARLO) {
+    __HAL_I2C_CLEAR_FLAG(hi2c, I2C_FLAG_ARLO);
+    LOG_WARN("i2c: Listen Complete Callback -> flag ARLO cleared");
+
+  } else if (i2cErrorCode == HAL_I2C_ERROR_AF) {
+    __HAL_I2C_CLEAR_FLAG(hi2c, I2C_FLAG_AF);
+    LOG_WARN("i2c: Listen Complete Callback -> flag AF cleared");
+
+  } else if (i2cErrorCode == HAL_I2C_ERROR_OVR) {
+    __HAL_I2C_CLEAR_FLAG(hi2c, I2C_FLAG_OVR);
+    LOG_WARN("i2c: Listen Complete Callback -> flag OVR cleared");
+  }
+
   char buf[100];
   sprintf(buf, "i2c: Listen Complete Callback -> Command 0x%02X", cmd);
   LOG_INFO(buf);
   HAL_I2C_EnableListen_IT(hi2c); // slave is ready again
+  i2cErrorCode = HAL_I2C_ERROR_NONE;
 }
 
 void HAL_I2C_AddrCallback(I2C_HandleTypeDef *hi2c, uint8_t TransferDirection, uint16_t AddrMatchCode) {
@@ -296,10 +314,6 @@ void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c) {
     sprintf(buf, "i2c: Error Callback -> err=0x%02lX", i2cErrorCode);
     LOG_ERROR(buf);
   }
-
-  LOG_WARN("i2c: Error Callback -> restart I2C");
-  HAL_I2C_MspDeInit(hi2c);
-  HAL_I2C_MspInit(hi2c);
 }
 
 void HAL_I2C_AbortCpltCallback(I2C_HandleTypeDef *hi2c) {
