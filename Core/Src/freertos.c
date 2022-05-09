@@ -186,19 +186,8 @@ void heartBeatCallback(void *argument)
   if (i2cErrorCode == HAL_I2C_ERROR_NONE && !alim1.fault && !alim2.fault) { // Pas d'erreur
     HAL_GPIO_TogglePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin);
 
-  } else if (i2cErrorCode != HAL_I2C_ERROR_NONE && !alim1.fault && !alim2.fault) { // Erreur I2C
-    HAL_GPIO_WritePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin, GPIO_PIN_RESET);
-    osDelay(1000);
-    for (uint32_t i = 0 ; i < i2cErrorCode * 2 ; i++) {
-      HAL_GPIO_TogglePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin);
-      osDelay(250);
-    }
-    HAL_GPIO_WritePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin, GPIO_PIN_RESET);
-  } else {
-    HAL_GPIO_WritePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin, GPIO_PIN_RESET);
-    osDelay(5000);
+  } else { // Erreur I2C ou alim
     HAL_GPIO_WritePin(HEART_BEAT_GPIO_Port, HEART_BEAT_Pin, GPIO_PIN_SET);
-    osDelay(5000);
   }
   /* USER CODE END heartBeatCallback */
 }

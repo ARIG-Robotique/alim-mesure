@@ -189,8 +189,8 @@ void HAL_I2C_ListenCpltCallback(I2C_HandleTypeDef *hi2c) {
   char buf[100];
   sprintf(buf, "i2c: Listen Complete Callback -> Command 0x%02X", cmd);
   LOG_INFO(buf);
-  HAL_I2C_EnableListen_IT(hi2c); // slave is ready again
   i2cErrorCode = HAL_I2C_ERROR_NONE;
+  HAL_I2C_EnableListen_IT(hi2c); // slave is ready again
 }
 
 void HAL_I2C_AddrCallback(I2C_HandleTypeDef *hi2c, uint8_t TransferDirection, uint16_t AddrMatchCode) {
