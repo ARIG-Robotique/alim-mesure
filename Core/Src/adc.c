@@ -53,6 +53,7 @@ void MX_ADC1_Init(void)
   {
     Error_Handler();
   }
+
   /** Configure Regular Channel
   */
 //  sConfig.Channel = ADC_CHANNEL_0;

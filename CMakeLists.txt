@@ -1,9 +1,9 @@
 #THIS FILE IS AUTO GENERATED FROM THE TEMPLATE! DO NOT CHANGE!
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.26)
 
-# specify cross compilers and tools
+# specify cross-compilers and tools
 set(CMAKE_C_COMPILER arm-none-eabi-gcc)
 set(CMAKE_CXX_COMPILER arm-none-eabi-g++)
 set(CMAKE_ASM_COMPILER  arm-none-eabi-gcc)
@@ -36,11 +36,14 @@ add_definitions(-DFIRMWARE_VERSION="${VERSION}-${GIT_HASH}")
 #Uncomment for software floating point
 #add_compile_options(-mfloat-abi=soft)
 
-add_compile_options(-mcpu=cortex-m3 -mthumb -mthumb-interwork)
+add_compile_options(-mcpu=cortex-m33 -mthumb -mthumb-interwork)
 add_compile_options(-ffunction-sections -fdata-sections -fno-common -fmessage-length=0)
 
 # uncomment to mitigate c++17 absolute addresses warnings
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-register")
+
+# Enable assembler files preprocessing
+add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-x$<SEMICOLON>assembler-with-cpp>)
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
     message(STATUS "Maximum optimization for speed")
@@ -67,7 +70,7 @@ file(GLOB_RECURSE SOURCES "startup/*.*" "Middlewares/*.*" "Drivers/*.*" "Core/*.
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F103C8Tx_FLASH.ld)
 
 add_link_options(-Wl,-gc-sections,--print-memory-usage,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map)
-add_link_options(-mcpu=cortex-m3 -mthumb -mthumb-interwork)
+add_link_options(-mcpu=cortex-m33 -mthumb -mthumb-interwork)
 add_link_options(-T ${LINKER_SCRIPT})
 
 # Uncomment to enable semihosting
