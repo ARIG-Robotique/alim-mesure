@@ -1,9 +1,11 @@
 name: build-release
 
 on:
-  - push
-  - pull_request
-  - workflow_dispatch
+  push:
+    branches:
+      - dev
+  pull_request: {}
+  workflow_dispatch: {}
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
