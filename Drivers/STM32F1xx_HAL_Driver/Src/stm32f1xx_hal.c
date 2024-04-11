@@ -603,5 +603,3 @@ void HAL_DBGMCU_DisableDBGStandbyMode(void)
 /**
   * @}
   */
-
-

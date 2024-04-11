@@ -2306,4 +2306,3 @@ uint32_t    LL_RCC_GetADCClockFreq(uint32_t ADCxSource);
 #endif
 
 #endif /* __STM32F1xx_LL_RCC_H */
-

@@ -353,5 +353,3 @@ void HAL_DBGMCU_DisableDBGStandbyMode(void);
 #endif
 
 #endif /* __STM32F1xx_HAL_H */
-
-

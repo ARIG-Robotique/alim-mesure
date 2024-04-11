@@ -52,4 +52,3 @@ void adcSelectAlim2Current(void);
 #endif
 
 #endif /* __ADC_H__ */
-

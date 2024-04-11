@@ -1,4 +1,4 @@
-name: build-release
+name: build
 
 on:
   push:
@@ -12,8 +12,21 @@ env:
   BUILD_TYPE: Release
 
 jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: pre-commit/action@v3.0.1
+
   build:
     runs-on: ubuntu-latest
+
+    needs: pre-commit
 
     steps:
       - uses: actions/checkout@v4

@@ -195,4 +195,3 @@ List_t * const pxList = ( List_t * ) pxItemToRemove->pvContainer;
 	return pxList->uxNumberOfItems;
 }
 /*-----------------------------------------------------------*/
-

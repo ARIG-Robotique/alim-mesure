@@ -195,4 +195,3 @@ void heartBeatCallback(void *argument)
 /* USER CODE BEGIN Application */
 
 /* USER CODE END Application */
-

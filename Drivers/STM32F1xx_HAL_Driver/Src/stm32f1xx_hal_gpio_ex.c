@@ -123,4 +123,3 @@ void HAL_GPIOEx_DisableEventout(void)
 /**
   * @}
   */
-

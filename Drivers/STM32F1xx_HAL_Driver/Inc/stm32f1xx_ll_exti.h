@@ -883,4 +883,3 @@ void LL_EXTI_StructInit(LL_EXTI_InitTypeDef *EXTI_InitStruct);
 #endif
 
 #endif /* STM32F1xx_LL_EXTI_H */
-

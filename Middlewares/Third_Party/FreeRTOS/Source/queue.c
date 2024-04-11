@@ -2894,15 +2894,3 @@ BaseType_t xReturn;
 	}
 
 #endif /* configUSE_QUEUE_SETS */
-
-
-
-
-
-
-
-
-
-
-
-

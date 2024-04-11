@@ -752,5 +752,3 @@ void vEventGroupClearBitsCallback( void *pvEventGroup, const uint32_t ulBitsToCl
 #endif
 
 #endif /* EVENT_GROUPS_H */
-
-
